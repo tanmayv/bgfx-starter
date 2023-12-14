@@ -20,6 +20,9 @@
 #include <fs.sc.mtl.bin.h>
 #endif // __APPLE__
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 static const bgfx::EmbeddedShader kEmbeddedShaders[] =
         {
                 BGFX_EMBEDDED_SHADER(vs),
@@ -50,29 +53,15 @@ const float triangleVertices[] = {
 const uint16_t triangleIndices[] = {
     0, 1, 2};
 
-// Vertex shader code
-const char *vs_code =
-    "attribute vec3 a_position;"
-    "attribute vec3 a_color;"
-    "varying vec3 v_color;"
-    "void main() {"
-    "    gl_Position = vec4(a_position, 1.0);"
-    "    v_color = a_color;"
-    "}";
-
-// Fragment shader code
-const char *fs_code =
-    "varying vec3 v_color;"
-    "void main() {"
-    "    gl_FragColor = vec4(v_color, 1.0);"
-    "}";
-
 class Application : public BgfxApplication
 {
 public:
     Application() : BgfxApplication({"Tanmay", {500, 500}}) {}
     void OnInit() override
     {
+        int texWidth, texHeight, texNChannels;
+        auto* textureData = stbi_load("assets/textures/test.png", &texWidth, &texHeight, &texNChannels, 0);
+        bgfx::TextureHandle textureHandle = bgfx::createTexture2D(bgfx::BackbufferRatio::Equal, false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_ BGFX_TEXTURE_NONE | BGFX_SAMPLER_NONE, textureData);
         // Create vertex buffer for a triangle
         bgfx::VertexLayout vertexLayout;
         vertexLayout.begin()
@@ -93,25 +82,18 @@ public:
             bgfx::createEmbeddedShader(kEmbeddedShaders, bgfx::getRendererType(), "vs"),
             bgfx::createEmbeddedShader(kEmbeddedShaders, bgfx::getRendererType(), "fs"),
             true);
-        std::cout << "Init()";
+        stbi_image_free_data(textureData);
     }
 
     void OnUpdate() override
     {
-        std::cout << "Update()";
-        bgfx::setState(
-        BGFX_STATE_WRITE_R
-                | BGFX_STATE_WRITE_G
-                | BGFX_STATE_WRITE_B
-                | BGFX_STATE_WRITE_A
-        );
         // Set vertex and index buffers
         bgfx::setVertexBuffer(0, vertexBuffer);
         bgfx::setIndexBuffer(indexBuffer);
 
         // Set transform state (not shown in this example)
-        bgfx::setDebug(BGFX_DEBUG_TEXT);
-        bgfx::dbgTextPrintf(0, 1, 0x0f, "Hello World");
+        // bgfx::setDebug(BGFX_DEBUG_TEXT);
+        // bgfx::dbgTextPrintf(0, 1, 0x0f, "Hello World");
         // Enable debug text.
 
         // Submit the draw call

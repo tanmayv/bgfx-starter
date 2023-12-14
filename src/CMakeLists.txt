@@ -33,3 +33,4 @@ bgfx_compile_shader_to_header(
 )
 
 target_include_directories(MyApplication PUBLIC ${CMAKE_BINARY_DIR}/include/generated/shaders)
+target_include_directories(MyApplication PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

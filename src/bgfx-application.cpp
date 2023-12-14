@@ -7,6 +7,9 @@
 #include <bgfx/platform.h>
 #include <GLFW/glfw3native.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 void BgfxApplication::Bootstrap() {
     if (!glfwInit()) {
         // TODO: Error handling
