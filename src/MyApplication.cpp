@@ -29,7 +29,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <mesh.hpp>
+#include "mesh.hpp"
+#include "camera.h"
+
 
 static const bgfx::EmbeddedShader kEmbeddedShaders[] =
     {
@@ -62,11 +64,11 @@ public:
         {
             std::cout << "Texture data is not null" << texWidth << texHeight << std::endl;
         }
+        camera = Camera{glm::vec3(0.0f, 0.0f, 3.0f)};
         std::cout << "textureColorUniform Start" << std::endl;
         textureColorUniform = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
         transformUniform = bgfx::createUniform("u_transform", bgfx::UniformType::Mat4);
         modelUniform = bgfx::createUniform("u_model1", bgfx::UniformType::Mat4);
-        viewUniform = bgfx::createUniform("u_view1", bgfx::UniformType::Mat4);
         projectionUniform = bgfx::createUniform("u_projection1", bgfx::UniformType::Mat4);
         std::cout << "textureColorUniform created" << std::endl;
         textureHandle = bgfx::createTexture2D(texWidth, texHeight, false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_NONE, bgfx::copy(textureData, texWidth * texHeight * 4));
@@ -123,7 +125,6 @@ public:
         // trans = glm::rotate(trans, 0, glm::vec3(0.0, 0.0, 1.0));
         bgfx::setUniform(transformUniform, glm::value_ptr(trans));
         bgfx::setUniform(modelUniform, glm::value_ptr(model));
-        bgfx::setUniform(viewUniform, glm::value_ptr(view));
         bgfx::setUniform(projectionUniform, glm::value_ptr(projection));
 
         // Set transform state (not shown in this example)
@@ -147,10 +148,10 @@ private:
     bgfx::UniformHandle textureColorUniform;
     bgfx::UniformHandle transformUniform;
     bgfx::UniformHandle modelUniform;
-    bgfx::UniformHandle viewUniform;
     bgfx::UniformHandle projectionUniform;
     bgfx::ProgramHandle program;
     glm::mat4 trans;
+    Camera camera;
 };
 
 int main()

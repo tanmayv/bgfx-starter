@@ -11,6 +11,7 @@
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <GLFW/glfw3native.h>
+#include <iostream>
 
 
 void BgfxApplication::Bootstrap() {
@@ -33,6 +34,7 @@ void BgfxApplication::Bootstrap() {
         return ;
     }
     glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     bgfx::renderFrame();
     // Initialize bgfx using the native window handle and window resolution.
     bgfx::Init init;
@@ -57,12 +59,19 @@ void BgfxApplication::Bootstrap() {
     bgfx::setViewClear(kClearView, BGFX_CLEAR_COLOR);
     bgfx::setViewRect(kClearView, 0, 0, bgfx::BackbufferRatio::Equal);
 
+    viewUniform = bgfx::createUniform("u_view1", bgfx::UniformType::Mat4);
     OnInit();
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+        float currentFrameTime = GetTime();
+        deltaTime = currentFrameTime -   lastFrameTime;
+        lastFrameTime = currentFrameTime;
+        ProcessInput(window);
+        bgfx::setUniform(viewUniform, glm::value_ptr(camera.GetViewMatrix()));
         OnUpdate();
+        
         bgfx::frame();
     }
     OnExit();
@@ -75,4 +84,20 @@ void BgfxApplication::Bootstrap() {
 
 float BgfxApplication::GetTime() {
     return (float)glfwGetTime();
+}
+
+void BgfxApplication::ProcessInput(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+    double currentX, currentY; 
+    glfwGetCursorPos(window, &currentX, &currentY);
+    camera.ProcessMouseMovement(currentX - lastX, currentY - lastY);
+    lastX = currentX;
+    lastY = currentY;
 }
