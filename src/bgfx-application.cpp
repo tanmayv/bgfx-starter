@@ -72,3 +72,7 @@ void BgfxApplication::Bootstrap() {
     glfwTerminate();
 
 }
+
+float BgfxApplication::GetTime() {
+    return (float)glfwGetTime();
+}

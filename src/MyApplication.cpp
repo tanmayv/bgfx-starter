@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <iostream>
-#include "bgfx-application.hpp"
 #include <bgfx/bgfx.h>
 #include <bgfx/embedded_shader.h>
 #include <bx/bx.h>
@@ -26,6 +25,11 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "bgfx-application.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <mesh.hpp>
 
 static const bgfx::EmbeddedShader kEmbeddedShaders[] =
     {
@@ -40,26 +44,6 @@ void glfwErrorCallback(int error, const char *description)
     std::cout << "GLFW Error: " << description;
 }
 
-// Vertex data for a colored triangle
-const float triangleVertices[] = {
-    -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // Vertex 0: position and texture coordinate
-    1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // Vertex 1: position and texture coordinate
-    0.0f, 1.0f, 0.0f, 0.5f, 0.0f,   // Vertex 2: position and texture coordinate
-};
-// const float triangleVertices[] = {
-//        -1.0f, -1.0f, 0.0f,  // Vertex 0: position
-//      1.0f,  0.0f, 0.0f,  // Vertex 0: color (red)
-
-//      1.0f, -1.0f, 0.0f,  // Vertex 1: position
-//      0.0f,  1.0f, 0.0f,  // Vertex 1: color (green)
-
-//      0.0f,  1.0f, 0.0f,  // Vertex 2: position
-//      0.0f,  0.0f, 1.0f,  // Vertex 2: color (blue)
-// };
-
-// Index data for a single triangle
-const uint16_t triangleIndices[] = {
-    0, 1, 2};
 
 class Application : public BgfxApplication
 {
@@ -80,6 +64,10 @@ public:
         }
         std::cout << "textureColorUniform Start" << std::endl;
         textureColorUniform = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
+        transformUniform = bgfx::createUniform("u_transform", bgfx::UniformType::Mat4);
+        modelUniform = bgfx::createUniform("u_model1", bgfx::UniformType::Mat4);
+        viewUniform = bgfx::createUniform("u_view1", bgfx::UniformType::Mat4);
+        projectionUniform = bgfx::createUniform("u_projection1", bgfx::UniformType::Mat4);
         std::cout << "textureColorUniform created" << std::endl;
         textureHandle = bgfx::createTexture2D(texWidth, texHeight, false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_NONE, bgfx::copy(textureData, texWidth * texHeight * 4));
         std::cout << "textureColorHandle created" << std::endl;
@@ -107,16 +95,36 @@ public:
             true);
 
         stbi_image_free(textureData);
+
+        bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0);
     }
 
     void OnUpdate() override
     {
         // Set vertex and index buffers
         bgfx::setState(
-            BGFX_STATE_WRITE_R | BGFX_STATE_WRITE_G | BGFX_STATE_WRITE_B | BGFX_STATE_WRITE_A);
+            BGFX_STATE_WRITE_Z | BGFX_STATE_DEPTH_TEST_LESS |  BGFX_STATE_MSAA | BGFX_STATE_WRITE_R | BGFX_STATE_WRITE_G | BGFX_STATE_WRITE_B | BGFX_STATE_WRITE_A);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, GetTime() * glm::radians(50.0f),
+                            glm::vec3(0.5f, 1.0f, 0.0f));
+        glm::mat4 view = glm::mat4(1.0f);
+        // note that we’re translating the scene in the reverse direction
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f,
+                                      100.0f);
+
         bgfx::setVertexBuffer(0, vertexBuffer);
         bgfx::setIndexBuffer(indexBuffer);
         bgfx::setTexture(0, textureColorUniform, textureHandle);
+        trans = glm::mat4(1.0f);
+        // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+        // trans = glm::rotate(trans, 0, glm::vec3(0.0, 0.0, 1.0));
+        bgfx::setUniform(transformUniform, glm::value_ptr(trans));
+        bgfx::setUniform(modelUniform, glm::value_ptr(model));
+        bgfx::setUniform(viewUniform, glm::value_ptr(view));
+        bgfx::setUniform(projectionUniform, glm::value_ptr(projection));
 
         // Set transform state (not shown in this example)
         // bgfx::setDebug(BGFX_DEBUG_TEXT);
@@ -129,6 +137,7 @@ public:
 
     void OnExit() override
     {
+        bgfx::destroy(program);
     }
 
 private:
@@ -136,7 +145,12 @@ private:
     bgfx::IndexBufferHandle indexBuffer;
     bgfx::TextureHandle textureHandle;
     bgfx::UniformHandle textureColorUniform;
+    bgfx::UniformHandle transformUniform;
+    bgfx::UniformHandle modelUniform;
+    bgfx::UniformHandle viewUniform;
+    bgfx::UniformHandle projectionUniform;
     bgfx::ProgramHandle program;
+    glm::mat4 trans;
 };
 
 int main()
@@ -144,5 +158,4 @@ int main()
     Application app;
     app.Bootstrap();
     return 0;
-    //     return 0;
 }

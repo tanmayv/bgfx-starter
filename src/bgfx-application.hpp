@@ -16,6 +16,7 @@ class BgfxApplication {
     virtual void OnInit() = 0;
     virtual void OnUpdate() = 0;
     virtual void OnExit() = 0;
+    float GetTime();
 
     private:
     Options opts_;
