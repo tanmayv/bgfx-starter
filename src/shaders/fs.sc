@@ -1,5 +1,11 @@
-$input v_color0
+$input v_uv
+
 #include <bgfx_shader.sh>
-void main() {
-    gl_FragColor = v_color0;
+
+SAMPLER2D(s_texColor,  0);
+
+void main()
+{
+    vec4 color = texture2D(s_texColor, v_uv);
+	gl_FragColor = color; 
 }
