@@ -5,7 +5,8 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_STANDARD 17)
 
 # Add Corrade as a subproject
-include("C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake")
+message("")
+include("$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 set(BGFX_BUILD_TOOLS_SHADER true)
 add_subdirectory(bgfx.cmake)
 add_subdirectory(src)

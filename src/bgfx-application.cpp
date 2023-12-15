@@ -1,6 +1,11 @@
 #include "bgfx-application.hpp"
 
+#if defined(_WIN32)
 #define GLFW_EXPOSE_NATIVE_WIN32
+#endif //  defined(_WIN32)
+#if defined(__linux__)
+#define GLFW_EXPOSE_NATIVE_X11
+#endif
 #include <GLFW/glfw3.h>
 #include <bx/bx.h>
 #include <bgfx/bgfx.h>

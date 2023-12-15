@@ -16,19 +16,18 @@
 #include <fs.sc.dx11.bin.h>
 #endif //  defined(_WIN32)
 #if __APPLE__
-#include <vs.sc.mtl.bin.h>
-#include <fs.sc.mtl.bin.h>
+// #include <vs.sc.mtl.bin.h>
+// #include <fs.sc.mtl.bin.h>
 #endif // __APPLE__
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 static const bgfx::EmbeddedShader kEmbeddedShaders[] =
-        {
-                BGFX_EMBEDDED_SHADER(vs),
-                BGFX_EMBEDDED_SHADER(fs),
-                BGFX_EMBEDDED_SHADER_END()
-        };
+    {
+        BGFX_EMBEDDED_SHADER(vs),
+        BGFX_EMBEDDED_SHADER(fs),
+        BGFX_EMBEDDED_SHADER_END()};
 
 // Callback function to handle GLFW errors
 void glfwErrorCallback(int error, const char *description)
@@ -39,9 +38,9 @@ void glfwErrorCallback(int error, const char *description)
 
 // Vertex data for a colored triangle
 const float triangleVertices[] = {
-     -1.0f, -1.0f, 0.0f,  0.0f, 1.0f, // Vertex 0: position and texture coordinate
-     1.0f, -1.0f, 0.0f,  1.0f, 1.0f, // Vertex 1: position and texture coordinate
-     0.0f,  1.0f, 0.0f,  0.5f, 0.0f, // Vertex 2: position and texture coordinate
+    -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // Vertex 0: position and texture coordinate
+    1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // Vertex 1: position and texture coordinate
+    0.0f, 1.0f, 0.0f, 0.5f, 0.0f,   // Vertex 2: position and texture coordinate
 };
 // const float triangleVertices[] = {
 //        -1.0f, -1.0f, 0.0f,  // Vertex 0: position
@@ -54,7 +53,6 @@ const float triangleVertices[] = {
 //      0.0f,  0.0f, 1.0f,  // Vertex 2: color (blue)
 // };
 
-
 // Index data for a single triangle
 const uint16_t triangleIndices[] = {
     0, 1, 2};
@@ -66,15 +64,18 @@ public:
     void OnInit() override
     {
         int texWidth, texHeight, texNChannels;
-        auto* textureData = stbi_load("assets/textures/test.png", &texWidth, &texHeight, &texNChannels, STBI_rgb_alpha);
-        if (!textureData) {
+        auto *textureData = stbi_load("assets/textures/test.png", &texWidth, &texHeight, &texNChannels, STBI_rgb_alpha);
+        if (!textureData)
+        {
             std::cout << "Texture data is null" << texWidth << texHeight << std::endl;
             return;
-        } else {
+        }
+        else
+        {
             std::cout << "Texture data is not null" << texWidth << texHeight << std::endl;
         }
         std::cout << "textureColorUniform Start" << std::endl;
-        textureColorUniform  = bgfx::createUniform("s_texColor",  bgfx::UniformType::Sampler);
+        textureColorUniform = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
         std::cout << "textureColorUniform created" << std::endl;
         textureHandle = bgfx::createTexture2D(texWidth, texHeight, false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_NONE, bgfx::copy(textureData, texWidth * texHeight * 4));
         std::cout << "textureColorHandle created" << std::endl;
@@ -106,11 +107,7 @@ public:
     {
         // Set vertex and index buffers
         bgfx::setState(
-        BGFX_STATE_WRITE_R
-                | BGFX_STATE_WRITE_G
-                | BGFX_STATE_WRITE_B
-                | BGFX_STATE_WRITE_A
-        );
+            BGFX_STATE_WRITE_R | BGFX_STATE_WRITE_G | BGFX_STATE_WRITE_B | BGFX_STATE_WRITE_A);
         bgfx::setVertexBuffer(0, vertexBuffer);
         bgfx::setIndexBuffer(indexBuffer);
         bgfx::setTexture(0, textureColorUniform, textureHandle);
@@ -127,13 +124,13 @@ public:
     void OnExit() override
     {
     }
-    private:
+
+private:
     bgfx::VertexBufferHandle vertexBuffer;
     bgfx::IndexBufferHandle indexBuffer;
     bgfx::TextureHandle textureHandle;
     bgfx::UniformHandle textureColorUniform;
     bgfx::ProgramHandle program;
-
 };
 
 int main()
