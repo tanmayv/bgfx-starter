@@ -11,6 +11,10 @@
 #include <fs.sc.glsl.bin.h>
 #include <fs.sc.essl.bin.h>
 #include <fs.sc.spv.bin.h>
+#if defined(__linux__)
+#include <vs.sc.dx11.bin.h>
+#include <fs.sc.dx11.bin.h>
+#endif //  defined(__linux__)
 #if defined(_WIN32)
 #include <vs.sc.dx11.bin.h>
 #include <fs.sc.dx11.bin.h>
@@ -95,12 +99,14 @@ public:
             bgfx::makeRef(triangleIndices, sizeof(triangleIndices)));
 
         // Create a simple program
+
+        std::cout << bgfx::getRendererType() << std::endl;
         program = bgfx::createProgram(
             bgfx::createEmbeddedShader(kEmbeddedShaders, bgfx::getRendererType(), "vs"),
             bgfx::createEmbeddedShader(kEmbeddedShaders, bgfx::getRendererType(), "fs"),
             true);
 
-        // stbi_image_free(textureData);
+        stbi_image_free(textureData);
     }
 
     void OnUpdate() override
